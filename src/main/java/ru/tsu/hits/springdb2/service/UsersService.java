@@ -118,7 +118,7 @@ public class UsersService implements UserDetailsService {
         return User.builder()
                 .username(user.getEmail())
                 .password(user.getPassword())
-                .authorities(user.getRole().toString())
+                .roles(user.getRole().toString())
                 .build();
     }
 }

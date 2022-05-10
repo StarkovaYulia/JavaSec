@@ -5,13 +5,16 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @RestController
 @RequestMapping("/auth")
 @RequiredArgsConstructor
 public class AuthenticationController {
     @PostMapping("/login")
-    public String login() {
-        return "login";
+    public List<String> login(Authentication authentication) {
+        return authentication.getAuthorities().stream().map(Object::toString).collect(Collectors.toList());
     }
 
     @PostMapping("/register")
