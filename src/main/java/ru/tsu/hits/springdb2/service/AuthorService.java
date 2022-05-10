@@ -2,6 +2,7 @@ package ru.tsu.hits.springdb2.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.tsu.hits.springdb2.dto.AuthorDto;
 import ru.tsu.hits.springdb2.dto.CreateUpdateAuthorDto;
 import ru.tsu.hits.springdb2.dto.converter.AuthorDtoConverter;
@@ -11,8 +12,9 @@ import ru.tsu.hits.springdb2.exception.AuthorNotFoundException;
 import ru.tsu.hits.springdb2.repository.AuthorRepository;
 import ru.tsu.hits.springdb2.repository.BookRepository;
 
-import javax.transaction.Transactional;
+
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -31,11 +33,19 @@ public class AuthorService {
         return AuthorDtoConverter.convertEntityToDto(authorEntity, getBooksByAuthor(authorEntity));
     }
 
-    @Transactional
-    public AuthorDto getAuthorDtoById(String uuid) {
+    @Transactional(readOnly = true)
+    public AuthorDto getAuthor(String uuid) {
         AuthorEntity authorEntity = getAuthorEntityById(uuid);
 
         return AuthorDtoConverter.convertEntityToDto(authorEntity, getBooksByAuthor(authorEntity));
+    }
+
+    @Transactional(readOnly = true)
+    public List<AuthorDto> getAuthors() {
+        return authorRepository.findAll()
+                .stream()
+                .map(author -> AuthorDtoConverter.convertEntityToDto(author, getBooksByAuthor(author)))
+                .collect(Collectors.toList());
     }
 
     @Transactional
@@ -51,7 +61,4 @@ public class AuthorService {
     public String getAuthorFullName(AuthorEntity authorEntity) {
         return authorEntity.getFirstName() + " " + authorEntity.getLastName();
     }
-
-
-
 }
