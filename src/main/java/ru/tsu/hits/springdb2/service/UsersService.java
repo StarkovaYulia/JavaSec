@@ -23,8 +23,6 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class UsersService {
-
-    private final PasswordService passwordService;
     private final UsersRepository usersRepository;
     private final UserDtoConverter userDtoConverter;
 
