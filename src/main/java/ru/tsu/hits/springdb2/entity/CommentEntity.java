@@ -15,7 +15,6 @@ import java.util.List;
 @NoArgsConstructor
 
 public class CommentEntity {
-
     @Id
     @Column(name = "id")
     private String uuid;
@@ -38,4 +37,6 @@ public class CommentEntity {
             inverseJoinColumns = @JoinColumn(name = "comment_id"))
     private List<TaskEntity> tasks;
 
+    @Column(nullable = false)
+    private String text;
 }
