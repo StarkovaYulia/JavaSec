@@ -1,14 +1,13 @@
 package ru.tsu.hits.springdb2.service;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.client.HttpClientErrorException;
 import ru.tsu.hits.springdb2.dto.BookDto;
 import ru.tsu.hits.springdb2.dto.CreateUpdateBookDto;
 import ru.tsu.hits.springdb2.dto.converter.BookDtoConverter;
 import ru.tsu.hits.springdb2.entity.BookEntity;
+import ru.tsu.hits.springdb2.exception.BookNotFoundException;
 import ru.tsu.hits.springdb2.repository.BookRepository;
 
 import java.util.List;
@@ -46,15 +45,13 @@ public class BookService {
 
     @Transactional
     public void delete(String id) {
-        var entity = bookRepository.findById(id)
-                .orElseThrow(() -> new HttpClientErrorException(HttpStatus.NOT_FOUND));
+        var entity = getBookEntityById(id);
         bookRepository.delete(entity);
     }
 
     @Transactional(readOnly = false)
     public BookDto getById(String id) {
-        var entity = bookRepository.findById(id)
-                .orElseThrow(() -> new HttpClientErrorException(HttpStatus.NOT_FOUND));
+        var entity = getBookEntityById(id);
         return BookDtoConverter.convertEntityToDto(entity);
     }
 
@@ -63,5 +60,10 @@ public class BookService {
                 .stream()
                 .map(BookDtoConverter::convertEntityToDto)
                 .collect(Collectors.toList());
+    }
+
+    private BookEntity getBookEntityById(String id) {
+        return bookRepository.findById(id)
+                .orElseThrow(() -> new BookNotFoundException("Book not found"));
     }
 }

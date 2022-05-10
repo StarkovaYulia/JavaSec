@@ -51,7 +51,7 @@ public class CommentService {
     @Transactional
     public UsersEntity getUserById(String uuid) {
         return usersRepository.findById(uuid)
-                .orElseThrow(() -> new HttpClientErrorException(HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new CommentNotFoundException("Comment not found"));
     }
 
     @Transactional
