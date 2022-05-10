@@ -5,14 +5,12 @@ import ru.tsu.hits.springdb2.dto.CreateUpdateBookDto;
 import ru.tsu.hits.springdb2.entity.AuthorEntity;
 import ru.tsu.hits.springdb2.entity.BookEntity;
 
-import java.util.UUID;
-
 public class BookDtoConverter {
 
-    public static BookEntity convertDtoToEntity(CreateUpdateBookDto dto, AuthorEntity author) {
+    public static BookEntity convertDtoToEntity(String id, CreateUpdateBookDto dto, AuthorEntity author) {
         BookEntity entity = new BookEntity();
 
-        entity.setUuid(UUID.randomUUID().toString());
+        entity.setUuid(id);
         updateEntityFromDto(entity, dto, author);
 
         return entity;

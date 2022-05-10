@@ -12,6 +12,7 @@ import ru.tsu.hits.springdb2.entity.BookEntity;
 import ru.tsu.hits.springdb2.repository.BookRepository;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -23,25 +24,14 @@ public class BookService {
     private final AuthorService authorService;
 
     @Transactional
-    public BookDto save(CreateUpdateBookDto dto) {
-        var author = authorService.getAuthorEntityById(dto.getAuthorId());
-
-        var entity = BookDtoConverter.convertDtoToEntity(dto, author);
-
-        entity = bookRepository.save(entity);
-
-        return BookDtoConverter.convertEntityToDto(entity);
-    }
-
-    @Transactional
-    public BookDto update(String id, CreateUpdateBookDto dto) {
+    public BookDto update(CreateUpdateBookDto dto, String id) {
         var entityOptional = bookRepository.findById(id);
 
         var author = authorService.getAuthorEntityById(dto.getAuthorId());
 
         BookEntity entity;
         if (entityOptional.isEmpty()) {
-            entity = BookDtoConverter.convertDtoToEntity(dto, author);
+            entity = BookDtoConverter.convertDtoToEntity(UUID.randomUUID().toString(), dto, author);
         } else {
             entity = entityOptional.get();
             BookDtoConverter.updateEntityFromDto(entity, dto, author);
@@ -52,6 +42,7 @@ public class BookService {
         return BookDtoConverter.convertEntityToDto(entity);
     }
 
+    @Transactional
     public void delete(String id) {
         var entity = bookRepository.findById(id)
                 .orElseThrow(() -> new HttpClientErrorException(HttpStatus.NOT_FOUND));
