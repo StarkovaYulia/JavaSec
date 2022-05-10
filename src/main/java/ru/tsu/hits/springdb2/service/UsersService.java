@@ -39,8 +39,8 @@ public class UsersService {
         return userDtoConverter.convertEntityToDto(entity);
     }
 
-    public UsersEntity getUserEntityById(String uuid) {
-        return usersRepository.findById(uuid)
+    public UsersEntity getUserEntityById(String id) {
+        return usersRepository.findById(id)
                 .orElseThrow(() -> new HttpClientErrorException(HttpStatus.NOT_FOUND));
     }
 

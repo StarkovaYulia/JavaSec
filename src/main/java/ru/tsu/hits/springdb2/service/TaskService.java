@@ -1,21 +1,14 @@
 package ru.tsu.hits.springdb2.service;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.client.HttpClientErrorException;
 import ru.tsu.hits.springdb2.dto.CreateUpdateTaskDto;
-import ru.tsu.hits.springdb2.dto.CreateUpdateUserDto;
 import ru.tsu.hits.springdb2.dto.TaskDto;
-import ru.tsu.hits.springdb2.dto.UsersDto;
 import ru.tsu.hits.springdb2.dto.converter.TaskDtoConverter;
 import ru.tsu.hits.springdb2.entity.*;
-import ru.tsu.hits.springdb2.exception.ProjectNotFoundException;
 import ru.tsu.hits.springdb2.exception.TaskNotFoundException;
-import ru.tsu.hits.springdb2.repository.ProjectRepository;
 import ru.tsu.hits.springdb2.repository.TaskRepository;
-import ru.tsu.hits.springdb2.repository.UsersRepository;
 
 import java.util.List;
 import java.util.UUID;
@@ -25,10 +18,10 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 
 public class TaskService {
-
     private final TaskRepository taskRepository;
-
     private final TaskDtoConverter taskDtoConverter;
+    private final UsersService usersService;
+    private final ProjectService projectService;
 
     @Transactional
     public TaskDto createOrUpdate(CreateUpdateTaskDto dto, String id) {
@@ -67,6 +60,26 @@ public class TaskService {
     public TaskDto getById(String id) {
         var entity = getTaskEntityById(id);
         return taskDtoConverter.convertEntityToDto(entity);
+    }
+
+    @Transactional(readOnly = true)
+    public List<TaskDto> getByUserExecutorId(String id) {
+        var user = usersService.getUserEntityById(id);
+
+        return taskRepository.findByUserExecutor(user)
+                .stream()
+                .map(taskDtoConverter::convertEntityToDto)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public List<TaskDto> getByProjectId(String id) {
+        var project = projectService.getProjectEntityById(id);
+
+        return taskRepository.findByProject(project)
+                .stream()
+                .map(taskDtoConverter::convertEntityToDto)
+                .collect(Collectors.toList());
     }
 
     private TaskEntity getTaskEntityById(String id) {

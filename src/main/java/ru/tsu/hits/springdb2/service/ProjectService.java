@@ -43,8 +43,8 @@ public class ProjectService {
     }
 
     @Transactional
-    public ProjectEntity getProjectEntityById(String uuid) {
-        return projectRepository.findById(uuid)
+    public ProjectEntity getProjectEntityById(String id) {
+        return projectRepository.findById(id)
                 .orElseThrow(() -> new ProjectNotFoundException("There is no such project"));
     }
 

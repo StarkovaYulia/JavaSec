@@ -5,27 +5,19 @@ import org.springframework.stereotype.Service;
 import ru.tsu.hits.springdb2.TaskCsv;
 import ru.tsu.hits.springdb2.dto.CreateUpdateUserDto;
 import ru.tsu.hits.springdb2.dto.UsersDto;
-import ru.tsu.hits.springdb2.entity.CommentEntity;
 import ru.tsu.hits.springdb2.entity.Role;
-import ru.tsu.hits.springdb2.entity.TaskEntity;
 import ru.tsu.hits.springdb2.entity.UsersEntity;
-import ru.tsu.hits.springdb2.repository.CommentRepository;
-import ru.tsu.hits.springdb2.repository.TaskRepository;
 import ru.tsu.hits.springdb2.service.PasswordService;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.List;
 import java.util.Locale;
 
 
 @Service
 @RequiredArgsConstructor
 public class UserDtoConverter {
-    private final TaskRepository taskRepository;
-    private final CommentRepository commentRepository;
-
     private final PasswordService passwordService;
 
     public UsersEntity convertDtoToEntity(String id, CreateUpdateUserDto dto) {
@@ -46,12 +38,6 @@ public class UserDtoConverter {
         entity.setRole(dto.getRole());
         entity.setCreationDate(dto.getCreationDate());
         entity.setEditDate(dto.getEditDate());
-
-        var tasks = getCreatedTasksByUser(entity);
-        entity.setCreatedTasks(tasks);
-        entity.setExecutionTasks(tasks);
-
-        entity.setComments(getCommentsByUser(entity));
     }
 
     public UsersDto convertEntityToDto(UsersEntity entity) {
@@ -64,14 +50,6 @@ public class UserDtoConverter {
                 entity.getCreationDate(),
                 entity.getEditDate()
         );
-    }
-
-    private List<TaskEntity> getCreatedTasksByUser(UsersEntity user) {
-        return taskRepository.findByUserCreator(user);
-    }
-
-    private List<CommentEntity> getCommentsByUser(UsersEntity user) {
-        return commentRepository.findByUser(user);
     }
 
     public CreateUpdateUserDto convertCsvToDto(TaskCsv user) throws ParseException {

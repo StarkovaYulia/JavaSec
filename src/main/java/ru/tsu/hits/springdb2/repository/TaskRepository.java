@@ -12,7 +12,7 @@ import java.util.List;
 public interface TaskRepository extends CrudRepository<TaskEntity, String> {
     @NonNull
     List<TaskEntity> findAll();
-    List<TaskEntity> findByUserCreator(UsersEntity usersEntity);
+    List<TaskEntity> findByUserExecutor(UsersEntity usersEntity);
     List<TaskEntity> findByProject(ProjectEntity projectEntity);
     List<TaskEntity> findByComments(CommentEntity commentEntity);
 }

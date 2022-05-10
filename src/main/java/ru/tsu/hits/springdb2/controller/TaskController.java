@@ -25,18 +25,28 @@ public class TaskController {
         return taskService.getById(id);
     }
 
+    @GetMapping("/by-executor/{id}")
+    public List<TaskDto> getByUserExecutorId(@PathVariable String id) {
+        return taskService.getByUserExecutorId(id);
+    }
+
+    @GetMapping("/by-project/{id}")
+    public List<TaskDto> getByProjectId(@PathVariable String id) {
+        return taskService.getByProjectId(id);
+    }
+
     @PostMapping
     public TaskDto create(@RequestBody CreateUpdateTaskDto dto) {
         return taskService.createOrUpdate(dto, null);
     }
 
     @PutMapping("/{id}")
-    public TaskDto create(@PathVariable String id, @RequestBody CreateUpdateTaskDto dto) {
+    public TaskDto update(@PathVariable String id, @RequestBody CreateUpdateTaskDto dto) {
         return taskService.createOrUpdate(dto, id);
     }
 
     @DeleteMapping("/{id}")
-    public void create(@PathVariable String id) {
+    public void delete(@PathVariable String id) {
         taskService.delete(id);
     }
 }
