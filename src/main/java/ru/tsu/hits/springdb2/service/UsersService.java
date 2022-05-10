@@ -45,12 +45,28 @@ public class UsersService {
     }
 
     @Transactional
-    public UsersDto createOrUpdate(CreateUpdateUserDto dto) {
-        var entity = userDtoConverter.convertDtoToEntity(UUID.randomUUID().toString(), dto);
+    public UsersDto createOrUpdate(CreateUpdateUserDto dto, String id) {
+        if (id == null) id = "";
+
+        var entityOptional = usersRepository.findById(id);
+
+        UsersEntity entity;
+        if (entityOptional.isEmpty()) {
+            entity = userDtoConverter.convertDtoToEntity(UUID.randomUUID().toString(), dto);
+        } else {
+            entity = entityOptional.get();
+            userDtoConverter.updateEntityFromDto(entity, dto);
+        }
 
         entity = usersRepository.save(entity);
 
         return userDtoConverter.convertEntityToDto(entity);
+    }
+
+    @Transactional
+    public void delete(String id) {
+        var entity = getUserEntityById(id);
+        usersRepository.delete(entity);
     }
 
     @Transactional

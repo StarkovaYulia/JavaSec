@@ -33,6 +33,16 @@ public class UserController {
 
     @PostMapping
     public UsersDto create(@RequestBody CreateUpdateUserDto createUpdateUserDto) {
-        return usersService.createOrUpdate(createUpdateUserDto);
+        return usersService.createOrUpdate(createUpdateUserDto, null);
+    }
+
+    @PutMapping("/{id}")
+    public UsersDto update(@PathVariable String id, @RequestBody CreateUpdateUserDto createUpdateUserDto) {
+        return usersService.createOrUpdate(createUpdateUserDto, id);
+    }
+
+    @DeleteMapping("/{id}")
+    public void update(@PathVariable String id) {
+        usersService.delete(id);
     }
 }

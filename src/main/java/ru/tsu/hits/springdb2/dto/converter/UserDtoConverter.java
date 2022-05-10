@@ -31,15 +31,15 @@ public class UserDtoConverter {
     public UsersEntity convertDtoToEntity(String id, CreateUpdateUserDto dto) {
         UsersEntity entity = new UsersEntity();
 
-        var password = passwordService.hashPassword(dto.getPassword());
-
         entity.setUuid(id);
-        updateEntityFromDto(entity, dto, password);
+        updateEntityFromDto(entity, dto);
 
         return entity;
     }
 
-    public void updateEntityFromDto(UsersEntity entity, CreateUpdateUserDto dto, byte[] password) {
+    public void updateEntityFromDto(UsersEntity entity, CreateUpdateUserDto dto) {
+        var password = passwordService.hashPassword(dto.getPassword());
+
         entity.setFio(dto.getFio());
         entity.setEmail(dto.getEmail());
         entity.setPassword(password);
