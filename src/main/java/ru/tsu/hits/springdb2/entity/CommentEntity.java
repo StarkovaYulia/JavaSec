@@ -13,7 +13,6 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-
 public class CommentEntity {
     @Id
     @Column(name = "id")
