@@ -5,7 +5,6 @@ import ru.tsu.hits.springdb2.dto.CreateUpdateBookDto;
 import ru.tsu.hits.springdb2.entity.AuthorEntity;
 import ru.tsu.hits.springdb2.entity.BookEntity;
 
-import java.util.List;
 import java.util.UUID;
 
 public class BookDtoConverter {
