@@ -4,22 +4,16 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.tsu.hits.springdb2.dto.CreateUpdateTaskDto;
 import ru.tsu.hits.springdb2.dto.TaskDto;
-import ru.tsu.hits.springdb2.entity.CommentEntity;
 import ru.tsu.hits.springdb2.entity.ProjectEntity;
 import ru.tsu.hits.springdb2.entity.TaskEntity;
 import ru.tsu.hits.springdb2.entity.UsersEntity;
-import ru.tsu.hits.springdb2.repository.CommentRepository;
 import ru.tsu.hits.springdb2.repository.ProjectRepository;
 import ru.tsu.hits.springdb2.repository.UsersRepository;
 
-import java.util.List;
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
 public class TaskDtoConverter {
-    private final CommentRepository commentRepository;
-
     private final UsersRepository usersRepository;
 
     private final ProjectRepository projectRepository;
@@ -60,7 +54,6 @@ public class TaskDtoConverter {
         dto.setUserCreator(taskEntity.getUserCreator().getUuid());
         dto.setUserExecutor(taskEntity.getUserExecutor().getUuid());
         dto.setProject(taskEntity.getProject().getUuid());
-        //dto.setComments(convertCommentsToDto(comments));
 
         return dto;
     }
@@ -71,26 +64,5 @@ public class TaskDtoConverter {
 
     private ProjectEntity getProjectById(String id) {
         return projectRepository.findById(id).orElseThrow();
-    }
-
-    /*private static List<CommentDto> convertCommentsToDto(List<CommentEntity> commentEntities) {
-        List<CommentDto> result = new ArrayList<>();
-
-        commentEntities.forEach(element -> {
-            CommentDto commentDto = new CommentDto();
-
-            commentDto.setId(element.getUuid());
-            commentDto.setCreationDate(element.getCreationDate());
-            commentDto.setEditDate(element.getEditDate());
-            commentDto.setUser(element.getUser().getUuid());
-
-            result.add(commentDto);
-        });
-
-        return result;
-    }*/
-
-    private List<CommentEntity> getCommentsByTask(TaskEntity taskEntity) {
-        return commentRepository.findByTasks(taskEntity);
     }
 }
