@@ -6,11 +6,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import ru.tsu.hits.springdb2.dto.BookDto;
 import ru.tsu.hits.springdb2.dto.CreateUpdateBookDto;
-import ru.tsu.hits.springdb2.entity.BookEntity;
+import ru.tsu.hits.springdb2.dto.converter.BookDtoConverter;
 import ru.tsu.hits.springdb2.repository.BookRepository;
 
 import javax.transaction.Transactional;
-import java.util.UUID;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -21,38 +22,26 @@ public class BookService {
     private final AuthorService authorService;
 
     @Transactional
-    public BookDto save(CreateUpdateBookDto createUpdateBookDto) {
+    public BookDto save(CreateUpdateBookDto dto) {
+        var author = authorService.getAuthorEntityById(dto.getAuthorId());
 
-        var author = authorService.getAuthorEntityById(createUpdateBookDto.getAuthorId());
+        var entity = BookDtoConverter.convertDtoToEntity(dto, author);
 
-        var entity = new BookEntity(
-                UUID.randomUUID().toString(),
-                createUpdateBookDto.getName(),
-                author,
-                createUpdateBookDto.getReleaseDate(),
-                createUpdateBookDto.getGenre()
-        );
-        var savedEntity = bookRepository.save(entity);
+        entity = bookRepository.save(entity);
 
-        return new BookDto(
-                savedEntity.getUuid(),
-                savedEntity.getName(),
-                authorService.getAuthorFullName(author),
-                savedEntity.getReleaseDate(),
-                savedEntity.getGenre()
-        );
+        return BookDtoConverter.convertEntityToDto(entity);
     }
 
     public BookDto getById(String id) {
         var entity = bookRepository.findById(id)
                 .orElseThrow(() -> new HttpClientErrorException(HttpStatus.NOT_FOUND));
-        return new BookDto(
-                entity.getUuid(),
-                entity.getName(),
-                authorService.getAuthorFullName(entity.getAuthor()),
-                entity.getReleaseDate(),
-                entity.getGenre()
-        );
+        return BookDtoConverter.convertEntityToDto(entity);
     }
 
+    public List<BookDto> getAll() {
+        return bookRepository.findAll()
+                .stream()
+                .map(BookDtoConverter::convertEntityToDto)
+                .collect(Collectors.toList());
+    }
 }

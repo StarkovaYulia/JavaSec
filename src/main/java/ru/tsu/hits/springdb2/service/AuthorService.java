@@ -80,8 +80,4 @@ public class AuthorService {
     public List<BookEntity> getBooksByAuthor(AuthorEntity authorEntity) {
         return bookRepository.findByAuthor(authorEntity);
     }
-
-    public String getAuthorFullName(AuthorEntity authorEntity) {
-        return authorEntity.getFirstName() + " " + authorEntity.getLastName();
-    }
 }
