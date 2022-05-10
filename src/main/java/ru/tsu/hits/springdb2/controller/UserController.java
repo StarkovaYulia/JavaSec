@@ -7,7 +7,7 @@ import ru.tsu.hits.springdb2.dto.CreateUpdateUserDto;
 import ru.tsu.hits.springdb2.dto.UsersDto;
 import ru.tsu.hits.springdb2.service.UsersService;
 
-import java.util.UUID;
+import java.util.List;
 
 @RestController
 @RequestMapping("/users")
@@ -16,22 +16,23 @@ public class UserController {
 
     private final UsersService usersService;
 
-    @PostMapping
-    public UsersDto save(@RequestBody CreateUpdateUserDto createUpdateUserDto) {
-        //usersService.saveFromCsv();
-        return usersService.save(createUpdateUserDto);
+    @GetMapping("/")
+    public List<UsersDto> getAll() {
+        return usersService.getAll();
     }
 
-
     @GetMapping("/{id}")
-    public UsersDto getById(@PathVariable UUID id)
-    {
-        return usersService.getById(id.toString());
+    public UsersDto getById(@PathVariable String id) {
+        return usersService.getById(id);
     }
 
     @PostMapping("/import")
-    public String importFromCsv() {
-        usersService.saveFromCsv();
-        return "Csv users in Database now";
+    public List<UsersDto> importFromCsv() {
+        return usersService.saveFromCsv();
+    }
+
+    @PostMapping
+    public UsersDto create(@RequestBody CreateUpdateUserDto createUpdateUserDto) {
+        return usersService.createOrUpdate(createUpdateUserDto);
     }
 }

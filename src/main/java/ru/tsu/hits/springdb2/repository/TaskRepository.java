@@ -9,7 +9,6 @@ import ru.tsu.hits.springdb2.entity.UsersEntity;
 import java.util.List;
 
 public interface TaskRepository extends CrudRepository<TaskEntity, String> {
-
     List<TaskEntity> findByUserCreator(UsersEntity usersEntity);
     List<TaskEntity> findByProject(ProjectEntity projectEntity);
     List<TaskEntity> findByComments(CommentEntity commentEntity);

@@ -5,65 +5,35 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.HttpClientErrorException;
 import ru.tsu.hits.springdb2.TaskCsv;
 import ru.tsu.hits.springdb2.dto.CreateUpdateUserDto;
 import ru.tsu.hits.springdb2.dto.UsersDto;
+import ru.tsu.hits.springdb2.dto.converter.UserDtoConverter;
 import ru.tsu.hits.springdb2.entity.*;
-import ru.tsu.hits.springdb2.repository.CommentRepository;
-import ru.tsu.hits.springdb2.repository.ProjectRepository;
-import ru.tsu.hits.springdb2.repository.TaskRepository;
 import ru.tsu.hits.springdb2.repository.UsersRepository;
 
-import javax.crypto.SecretKeyFactory;
-import javax.crypto.spec.PBEKeySpec;
-import javax.transaction.Transactional;
-
 import java.io.InputStreamReader;
-import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
-import java.security.spec.InvalidKeySpecException;
-import java.security.spec.KeySpec;
 
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class UsersService {
 
+    private final PasswordService passwordService;
     private final UsersRepository usersRepository;
-    private final TaskRepository taskRepository;
-    private final CommentRepository commentRepository;
-    private final ProjectRepository projectRepository;
+    private final UserDtoConverter userDtoConverter;
 
     @Value("${csvPath}")
     private String csvPath;
 
-    public byte[] HashPassword(String password){
-        SecureRandom random = new SecureRandom();
-        byte[] salt = new byte[16];
-        random.nextBytes(salt);
-
-        KeySpec spec = new PBEKeySpec(password.toCharArray(), salt,65536, 128);
-        SecretKeyFactory factory = null;
-        try {
-            factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-        }
-        byte[] hash = null;
-        try {
-            hash = factory.generateSecret(spec).getEncoded();
-        } catch (InvalidKeySpecException e) {
-            e.printStackTrace();
-        }
-        return hash;
-    }
-
-    public UsersEntity CreateEntity(TaskCsv user) throws ParseException {
-        byte[] password = HashPassword(String.valueOf(user.getPassword()));
+    public UsersEntity createEntity(TaskCsv user) throws ParseException {
+        throw new RuntimeException();
+        /*byte[] password = passwordService.hashPassword(String.valueOf(user.getPassword()));
         Role role = null;
         String currentRole = user.getField("role");
 
@@ -95,9 +65,7 @@ public class UsersService {
         entity.setExecutionTasks(getCreatedTasksByUser(entity));
         entity.setComments(getCommentsByUser(entity));
 
-        var savedEntity = usersRepository.save(entity);
-        return savedEntity;
-
+        return usersRepository.save(entity);*/
     }
 
     public UsersEntity getUserEntityById(String uuid) {
@@ -106,54 +74,17 @@ public class UsersService {
     }
 
     @Transactional
-    public List<TaskEntity> getCreatedTasksByUser(UsersEntity user) {
-        return taskRepository.findByUserCreator(user);
+    public UsersDto createOrUpdate(CreateUpdateUserDto dto) {
+        var entity = userDtoConverter.convertDtoToEntity(UUID.randomUUID().toString(), dto);
+
+        entity = usersRepository.save(entity);
+
+        return userDtoConverter.convertEntityToDto(entity);
     }
 
     @Transactional
-    public List<CommentEntity> getCommentsByUser(UsersEntity user) {
-        return commentRepository.findByUser(user);
-    }
-
-
-
-    @Transactional
-    public UsersDto save(CreateUpdateUserDto createUpdateUserDto) {
-        byte[] password = HashPassword(createUpdateUserDto.getPassword());
-
-        var entity = new UsersEntity();
-        entity.setUuid(UUID.randomUUID().toString());
-        entity.setFio(createUpdateUserDto.getFio());
-        entity.setEmail(createUpdateUserDto.getEmail());
-        entity.setPassword(password);
-        entity.setRole(createUpdateUserDto.getRole());
-        entity.setCreationDate(createUpdateUserDto.getCreationDate());
-        entity.setEditDate(createUpdateUserDto.getEditDate());
-
-        entity.setCreatedTasks(getCreatedTasksByUser(entity));
-        entity.setExecutionTasks(getCreatedTasksByUser(entity));
-        entity.setComments(getCommentsByUser(entity));
-
-        var savedEntity = usersRepository.save(entity);
-
-        return new UsersDto(
-                savedEntity.getUuid(),
-                savedEntity.getFio(),
-                savedEntity.getEmail(),
-                savedEntity.getPassword(),
-                savedEntity.getRole(),
-                savedEntity.getCreationDate(),
-                savedEntity.getEditDate()
-        );
-    }
-
-    @Transactional
-    public void saveFromCsv() {
-        saveFromCsv(csvPath);
-    }
-
-    private void saveFromCsv(String path) {
-        var csvStream = UsersService.class.getResourceAsStream(path);
+    public List<UsersDto> saveFromCsv() {
+        var csvStream = UsersService.class.getResourceAsStream(csvPath);
         var tasks = new CsvToBeanBuilder<TaskCsv>(new InputStreamReader(Objects.requireNonNull(csvStream)))
                 .withSeparator(',')
                 .withType(TaskCsv.class)
@@ -161,28 +92,31 @@ public class UsersService {
                 .build()
                 .parse();
 
-        tasks.stream()
-                .forEach(i -> {
+        return tasks.stream()
+                .map(task -> {
                     try {
-                        CreateEntity(i);
+                        return createEntity(task);
                     } catch (ParseException e) {
                         e.printStackTrace();
+                        return null;
                     }
-                });
+                })
+                .filter(Objects::nonNull)
+                .map(userDtoConverter::convertEntityToDto)
+                .collect(Collectors.toList());
     }
 
-    public UsersDto getById(String id)
-    {
-        var entity = usersRepository.findById(id)
-                .orElseThrow(() -> new HttpClientErrorException(HttpStatus.NOT_FOUND));
-        return new UsersDto(
-                entity.getUuid(),
-                entity.getFio(),
-                entity.getEmail(),
-                entity.getPassword(),
-                entity.getRole(),
-                entity.getCreationDate(),
-                entity.getEditDate()
-        );
+    @Transactional(readOnly = true)
+    public List<UsersDto> getAll() {
+        return usersRepository.findAll()
+                .stream()
+                .map(userDtoConverter::convertEntityToDto)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public UsersDto getById(String id) {
+        var entity = getUserEntityById(id);
+        return userDtoConverter.convertEntityToDto(entity)
     }
 }
