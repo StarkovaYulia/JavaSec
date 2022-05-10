@@ -22,10 +22,14 @@ public class AuthorDtoConverter {
         AuthorEntity authorEntity = new AuthorEntity();
 
         authorEntity.setUuid(UUID.randomUUID().toString());
-        authorEntity.setFirstName(dto.getFirstName());
-        authorEntity.setLastName(dto.getLastName());
+        updateEntityFromDto(authorEntity, dto);
 
         return authorEntity;
+    }
+
+    public static void updateEntityFromDto(AuthorEntity entity, CreateUpdateAuthorDto dto) {
+        entity.setFirstName(dto.getFirstName());
+        entity.setLastName(dto.getLastName());
     }
 
     public static AuthorDto convertEntityToDto(AuthorEntity authorEntity, List<BookEntity> bookEntities) {

@@ -33,6 +33,29 @@ public class AuthorService {
         return AuthorDtoConverter.convertEntityToDto(authorEntity, getBooksByAuthor(authorEntity));
     }
 
+    @Transactional
+    public AuthorDto updateAuthor(String id, CreateUpdateAuthorDto dto) {
+        var authorEntityOptional = authorRepository.findById(id);
+        AuthorEntity authorEntity;
+        if (authorEntityOptional.isEmpty()) {
+            authorEntity = AuthorDtoConverter.convertDtoToEntity(dto);
+        } else {
+            authorEntity = authorEntityOptional.get();
+            AuthorDtoConverter.updateEntityFromDto(authorEntity, dto);
+        }
+
+        authorEntity = authorRepository.save(authorEntity);
+
+        return AuthorDtoConverter.convertEntityToDto(authorEntity, getBooksByAuthor(authorEntity));
+    }
+
+    @Transactional
+    public void deleteAuthor(String id) {
+        var authorEntity = getAuthorEntityById(id);
+
+        authorRepository.delete(authorEntity);
+    }
+
     @Transactional(readOnly = true)
     public AuthorDto getAuthor(String uuid) {
         AuthorEntity authorEntity = getAuthorEntityById(uuid);

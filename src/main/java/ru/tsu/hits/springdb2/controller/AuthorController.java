@@ -27,7 +27,17 @@ public class AuthorController {
     }
 
     @PostMapping
-    public AuthorDto createAuthor(@RequestBody CreateUpdateAuthorDto createUpdateAuthorDto) {
-        return authorService.createAuthor(createUpdateAuthorDto);
+    public AuthorDto createAuthor(@RequestBody CreateUpdateAuthorDto dto) {
+        return authorService.createAuthor(dto);
+    }
+
+    @PutMapping(value = "/{id}")
+    public AuthorDto createAuthor(@PathVariable String id, @RequestBody CreateUpdateAuthorDto dto) {
+        return authorService.updateAuthor(id, dto);
+    }
+
+    @DeleteMapping(value = "/{id}")
+    public void deleteAuthor(@PathVariable String id) {
+        authorService.deleteAuthor(id);
     }
 }
