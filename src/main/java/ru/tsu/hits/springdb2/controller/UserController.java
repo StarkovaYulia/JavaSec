@@ -29,4 +29,9 @@ public class UserController {
         return usersService.getById(id.toString());
     }
 
+    @PostMapping("/import")
+    public String importFromCsv() {
+        usersService.saveFromCsv();
+        return "Csv users in Database now";
+    }
 }

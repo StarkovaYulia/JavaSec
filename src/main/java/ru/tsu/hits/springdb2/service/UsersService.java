@@ -2,6 +2,7 @@ package ru.tsu.hits.springdb2.service;
 
 import com.opencsv.bean.CsvToBeanBuilder;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
@@ -36,6 +37,9 @@ public class UsersService {
     private final TaskRepository taskRepository;
     private final CommentRepository commentRepository;
     private final ProjectRepository projectRepository;
+
+    @Value("${csvPath}")
+    private String csvPath;
 
     public byte[] HashPassword(String password){
         SecureRandom random = new SecureRandom();
@@ -144,9 +148,12 @@ public class UsersService {
     }
 
     @Transactional
-    public void saveFromCsv()
-    {
-        var csvStream = UsersService.class.getResourceAsStream("/tasks.csv");
+    public void saveFromCsv() {
+        saveFromCsv(csvPath);
+    }
+
+    private void saveFromCsv(String path) {
+        var csvStream = UsersService.class.getResourceAsStream(path);
         var tasks = new CsvToBeanBuilder<TaskCsv>(new InputStreamReader(Objects.requireNonNull(csvStream)))
                 .withSeparator(',')
                 .withType(TaskCsv.class)
