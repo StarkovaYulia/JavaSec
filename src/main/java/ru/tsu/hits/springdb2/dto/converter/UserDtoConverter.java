@@ -2,17 +2,22 @@ package ru.tsu.hits.springdb2.dto.converter;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import ru.tsu.hits.springdb2.TaskCsv;
 import ru.tsu.hits.springdb2.dto.CreateUpdateUserDto;
 import ru.tsu.hits.springdb2.dto.UsersDto;
 import ru.tsu.hits.springdb2.entity.CommentEntity;
+import ru.tsu.hits.springdb2.entity.Role;
 import ru.tsu.hits.springdb2.entity.TaskEntity;
 import ru.tsu.hits.springdb2.entity.UsersEntity;
 import ru.tsu.hits.springdb2.repository.CommentRepository;
-import ru.tsu.hits.springdb2.repository.ProjectRepository;
 import ru.tsu.hits.springdb2.repository.TaskRepository;
 import ru.tsu.hits.springdb2.service.PasswordService;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 
 @Service
@@ -67,5 +72,23 @@ public class UserDtoConverter {
 
     private List<CommentEntity> getCommentsByUser(UsersEntity user) {
         return commentRepository.findByUser(user);
+    }
+
+    public CreateUpdateUserDto convertCsvToDto(TaskCsv user) throws ParseException {
+        Role role = Role.valueOf(user.getRole());
+
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH);
+        Date creationDate = formatter.parse(user.getCreationDate());
+        Date editDate = formatter.parse(user.getEditDate());
+
+        var dto = new CreateUpdateUserDto();
+        dto.setFio( user.getFio());
+        dto.setEmail(user.getEmail());
+        dto.setPassword(user.getPassword());
+        dto.setRole(role);
+        dto.setCreationDate(creationDate);
+        dto.setEditDate(editDate);
+
+        return dto;
     }
 }

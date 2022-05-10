@@ -31,41 +31,14 @@ public class UsersService {
     @Value("${csvPath}")
     private String csvPath;
 
-    public UsersEntity createEntity(TaskCsv user) throws ParseException {
-        throw new RuntimeException();
-        /*byte[] password = passwordService.hashPassword(String.valueOf(user.getPassword()));
-        Role role = null;
-        String currentRole = user.getField("role");
+    private UsersDto createFromCsv(TaskCsv user) throws ParseException {
+        var dto = userDtoConverter.convertCsvToDto(user);
 
-        switch (currentRole)
-        {
-            case "ADMIN":
-                role = Role.ADMIN;
-                break;
-            case "USER":
-                role = Role.USER;
-                break;
-        }
+        var entity = userDtoConverter.convertDtoToEntity(UUID.randomUUID().toString(), dto);
 
-        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH);
-        Date creationDate = formatter.parse(user.getField("creationDate"));
-        Date editDate = formatter.parse(user.getField("editDate"));
+        entity = usersRepository.save(entity);
 
-
-        var entity = new UsersEntity();
-        entity.setUuid(UUID.randomUUID().toString());
-        entity.setFio( user.getField("fio"));
-        entity.setEmail(user.getField("email"));
-        entity.setPassword(password);
-        entity.setRole(role);
-        entity.setCreationDate(creationDate);
-        entity.setEditDate(editDate);
-
-        entity.setCreatedTasks(getCreatedTasksByUser(entity));
-        entity.setExecutionTasks(getCreatedTasksByUser(entity));
-        entity.setComments(getCommentsByUser(entity));
-
-        return usersRepository.save(entity);*/
+        return userDtoConverter.convertEntityToDto(entity);
     }
 
     public UsersEntity getUserEntityById(String uuid) {
@@ -95,14 +68,13 @@ public class UsersService {
         return tasks.stream()
                 .map(task -> {
                     try {
-                        return createEntity(task);
+                        return createFromCsv(task);
                     } catch (ParseException e) {
                         e.printStackTrace();
                         return null;
                     }
                 })
                 .filter(Objects::nonNull)
-                .map(userDtoConverter::convertEntityToDto)
                 .collect(Collectors.toList());
     }
 
@@ -117,6 +89,6 @@ public class UsersService {
     @Transactional(readOnly = true)
     public UsersDto getById(String id) {
         var entity = getUserEntityById(id);
-        return userDtoConverter.convertEntityToDto(entity)
+        return userDtoConverter.convertEntityToDto(entity);
     }
 }
