@@ -28,14 +28,12 @@ public class BookService {
 
         var entityOptional = bookRepository.findById(id);
 
-        var author = authorService.getAuthorEntityById(dto.getAuthorId());
-
         BookEntity entity;
         if (entityOptional.isEmpty()) {
-            entity = BookDtoConverter.convertDtoToEntity(UUID.randomUUID().toString(), dto, author);
+            entity = BookDtoConverter.convertDtoToEntity(UUID.randomUUID().toString(), dto, authorService);
         } else {
             entity = entityOptional.get();
-            BookDtoConverter.updateEntityFromDto(entity, dto, author);
+            BookDtoConverter.updateEntityFromDto(entity, dto, authorService);
         }
 
         entity = bookRepository.save(entity);
