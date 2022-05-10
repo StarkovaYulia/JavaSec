@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.HttpClientErrorException;
 import ru.tsu.hits.springdb2.TaskCsv;
 import ru.tsu.hits.springdb2.dto.CreateUpdateUserDto;
+import ru.tsu.hits.springdb2.dto.RegisterDto;
 import ru.tsu.hits.springdb2.dto.UsersDto;
 import ru.tsu.hits.springdb2.dto.converter.UserDtoConverter;
 import ru.tsu.hits.springdb2.entity.*;
@@ -120,5 +121,37 @@ public class UsersService implements UserDetailsService {
                 .password(user.getPassword())
                 .roles(user.getRole().toString())
                 .build();
+    }
+
+    @Transactional
+    public UsersDto createNew(RegisterDto dto) {
+        var entity = userDtoConverter.convertDtoToEntity(UUID.randomUUID().toString(), toUserDto(dto));
+
+        entity = usersRepository.save(entity);
+
+        return userDtoConverter.convertEntityToDto(entity);
+    }
+
+    private CreateUpdateUserDto toUserDto(RegisterDto dto) {
+        var createDto = new CreateUpdateUserDto();
+
+        var date = new Date();
+        createDto.setCreationDate(date);
+        createDto.setEditDate(date);
+
+        createDto.setEmail(dto.getEmail());
+        createDto.setFio(dto.getFio());
+        createDto.setRole(Role.USER);
+        createDto.setPassword(dto.getPassword());
+
+        return createDto;
+    }
+
+    @Transactional
+    public UsersDto updateRole(String id, Role role) {
+        var entity = getUserEntityById(id);
+        entity.setRole(role);
+        entity = usersRepository.save(entity);
+        return userDtoConverter.convertEntityToDto(entity);
     }
 }

@@ -5,6 +5,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import ru.tsu.hits.springdb2.TaskCsv;
 import ru.tsu.hits.springdb2.dto.CreateUpdateUserDto;
+import ru.tsu.hits.springdb2.dto.RegisterDto;
 import ru.tsu.hits.springdb2.dto.UsersDto;
 import ru.tsu.hits.springdb2.entity.Role;
 import ru.tsu.hits.springdb2.entity.UsersEntity;

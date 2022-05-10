@@ -6,6 +6,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import ru.tsu.hits.springdb2.dto.CreateUpdateUserDto;
 import ru.tsu.hits.springdb2.dto.UsersDto;
+import ru.tsu.hits.springdb2.entity.Role;
 import ru.tsu.hits.springdb2.service.UsersService;
 
 import java.util.List;
@@ -45,6 +46,12 @@ public class UserController {
     @PutMapping("/{id}")
     public UsersDto update(@PathVariable String id, @RequestBody CreateUpdateUserDto createUpdateUserDto) {
         return usersService.createOrUpdate(createUpdateUserDto, id);
+    }
+
+    @PreAuthorize("hasAnyRole('ADMIN')")
+    @PutMapping("/role/{id}")
+    public UsersDto updateRole(@PathVariable String id) {
+        return usersService.updateRole(id, Role.ADMIN);
     }
 
     @PreAuthorize("hasAnyRole('ADMIN')")
