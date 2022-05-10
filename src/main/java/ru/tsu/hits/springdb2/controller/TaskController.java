@@ -5,6 +5,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import ru.tsu.hits.springdb2.dto.CreateUpdateTaskDto;
 import ru.tsu.hits.springdb2.dto.TaskDto;
+import ru.tsu.hits.springdb2.dto.UpdateTaskExecutorDto;
+import ru.tsu.hits.springdb2.dto.UpdateTaskPriorityDto;
 import ru.tsu.hits.springdb2.service.TaskService;
 
 import java.util.List;
@@ -43,6 +45,16 @@ public class TaskController {
     @PutMapping("/{id}")
     public TaskDto update(@PathVariable String id, @RequestBody CreateUpdateTaskDto dto) {
         return taskService.createOrUpdate(dto, id);
+    }
+
+    @PatchMapping("/priority/{id}")
+    public TaskDto updatePriority(@PathVariable String id, @RequestBody UpdateTaskPriorityDto dto) {
+        return taskService.updatePriority(dto, id);
+    }
+
+    @PatchMapping("/executor/{id}")
+    public TaskDto updateExecutor(@PathVariable String id, @RequestBody UpdateTaskExecutorDto dto) {
+        return taskService.updateExecutor(dto, id);
     }
 
     @DeleteMapping("/{id}")

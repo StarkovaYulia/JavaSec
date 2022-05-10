@@ -5,6 +5,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.tsu.hits.springdb2.dto.CreateUpdateTaskDto;
 import ru.tsu.hits.springdb2.dto.TaskDto;
+import ru.tsu.hits.springdb2.dto.UpdateTaskExecutorDto;
+import ru.tsu.hits.springdb2.dto.UpdateTaskPriorityDto;
 import ru.tsu.hits.springdb2.dto.converter.TaskDtoConverter;
 import ru.tsu.hits.springdb2.entity.*;
 import ru.tsu.hits.springdb2.exception.TaskNotFoundException;
@@ -36,6 +38,27 @@ public class TaskService {
             entity = entityOptional.get();
             taskDtoConverter.updateEntityFromDto(entity, dto);
         }
+
+        entity = taskRepository.save(entity);
+
+        return taskDtoConverter.convertEntityToDto(entity);
+    }
+
+    @Transactional
+    public TaskDto updatePriority(UpdateTaskPriorityDto dto, String id) {
+        var entity = getTaskEntityById(id);
+        entity.setPriority(dto.getPriority());
+
+        entity = taskRepository.save(entity);
+
+        return taskDtoConverter.convertEntityToDto(entity);
+    }
+
+    @Transactional
+    public TaskDto updateExecutor(UpdateTaskExecutorDto dto, String id) {
+        var entity = getTaskEntityById(id);
+        var user = usersService.getUserEntityById(dto.getUserExecutor());
+        entity.setUserExecutor(user);
 
         entity = taskRepository.save(entity);
 
