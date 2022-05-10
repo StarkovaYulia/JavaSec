@@ -28,8 +28,8 @@ public class UsersEntity {
     private String email;
 
     @Column
-    @Type(type="org.hibernate.type.BinaryType")
-    private byte[] password;
+    //@Type(type="org.hibernate.type.BinaryType")
+    private String password;
 
     @Enumerated(EnumType.STRING)
     @Column

@@ -10,4 +10,6 @@ import java.util.List;
 public interface UsersRepository extends CrudRepository<UsersEntity, String> {
     @NonNull
     List<UsersEntity> findAll();
+
+    UsersEntity findByEmail(String email);
 }

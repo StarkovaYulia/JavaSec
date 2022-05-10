@@ -1,13 +1,13 @@
 package ru.tsu.hits.springdb2.dto.converter;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import ru.tsu.hits.springdb2.TaskCsv;
 import ru.tsu.hits.springdb2.dto.CreateUpdateUserDto;
 import ru.tsu.hits.springdb2.dto.UsersDto;
 import ru.tsu.hits.springdb2.entity.Role;
 import ru.tsu.hits.springdb2.entity.UsersEntity;
-import ru.tsu.hits.springdb2.service.PasswordService;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -18,7 +18,8 @@ import java.util.Locale;
 @Service
 @RequiredArgsConstructor
 public class UserDtoConverter {
-    private final PasswordService passwordService;
+    //private final PasswordService passwordService;
+    private final PasswordEncoder passwordEncoder;
 
     public UsersEntity convertDtoToEntity(String id, CreateUpdateUserDto dto) {
         UsersEntity entity = new UsersEntity();
@@ -30,7 +31,8 @@ public class UserDtoConverter {
     }
 
     public void updateEntityFromDto(UsersEntity entity, CreateUpdateUserDto dto) {
-        var password = passwordService.hashPassword(dto.getPassword());
+        //var password = passwordService.hashPassword(dto.getPassword());
+        var password = passwordEncoder.encode(dto.getPassword());
 
         entity.setFio(dto.getFio());
         entity.setEmail(dto.getEmail());

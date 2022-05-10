@@ -1,0 +1,4 @@
+﻿#!/bin/bash
+
+curl -X GET http://someoneexample.com:nothanks@localhost:8192/auth/me
+# -H 'Authorization: Basic YWRtaW46YXBpcHdk'
