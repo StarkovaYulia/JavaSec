@@ -28,12 +28,12 @@ public class AuthorController {
 
     @PostMapping
     public AuthorDto createAuthor(@RequestBody CreateUpdateAuthorDto dto) {
-        return authorService.createAuthor(dto);
+        return authorService.createOrUpdate(dto, null);
     }
 
     @PutMapping(value = "/{id}")
     public AuthorDto createAuthor(@PathVariable String id, @RequestBody CreateUpdateAuthorDto dto) {
-        return authorService.updateAuthor(id, dto);
+        return authorService.createOrUpdate(dto, id);
     }
 
     @DeleteMapping(value = "/{id}")

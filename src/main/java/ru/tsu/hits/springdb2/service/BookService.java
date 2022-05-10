@@ -24,7 +24,9 @@ public class BookService {
     private final AuthorService authorService;
 
     @Transactional
-    public BookDto update(CreateUpdateBookDto dto, String id) {
+    public BookDto createOrUpdate(CreateUpdateBookDto dto, String id) {
+        if (id == null) id = "";
+
         var entityOptional = bookRepository.findById(id);
 
         var author = authorService.getAuthorEntityById(dto.getAuthorId());

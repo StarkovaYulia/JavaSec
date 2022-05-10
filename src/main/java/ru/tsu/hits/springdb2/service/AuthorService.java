@@ -14,6 +14,7 @@ import ru.tsu.hits.springdb2.repository.BookRepository;
 
 
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -25,20 +26,13 @@ public class AuthorService {
     private final BookRepository bookRepository;
 
     @Transactional
-    public AuthorDto createAuthor(CreateUpdateAuthorDto dto) {
-        AuthorEntity authorEntity = AuthorDtoConverter.convertDtoToEntity(dto);
+    public AuthorDto createOrUpdate(CreateUpdateAuthorDto dto, String id) {
+        if (id == null) id = "";
 
-        authorEntity = authorRepository.save(authorEntity);
-
-        return AuthorDtoConverter.convertEntityToDto(authorEntity, getBooksByAuthor(authorEntity));
-    }
-
-    @Transactional
-    public AuthorDto updateAuthor(String id, CreateUpdateAuthorDto dto) {
         var authorEntityOptional = authorRepository.findById(id);
         AuthorEntity authorEntity;
         if (authorEntityOptional.isEmpty()) {
-            authorEntity = AuthorDtoConverter.convertDtoToEntity(dto);
+            authorEntity = AuthorDtoConverter.convertDtoToEntity(UUID.randomUUID().toString(), dto);
         } else {
             authorEntity = authorEntityOptional.get();
             AuthorDtoConverter.updateEntityFromDto(authorEntity, dto);

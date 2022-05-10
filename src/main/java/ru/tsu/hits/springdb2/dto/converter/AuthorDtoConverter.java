@@ -18,10 +18,10 @@ import java.util.UUID;
 
 public class AuthorDtoConverter {
 
-    public static AuthorEntity convertDtoToEntity(CreateUpdateAuthorDto dto) {
+    public static AuthorEntity convertDtoToEntity(String id, CreateUpdateAuthorDto dto) {
         AuthorEntity authorEntity = new AuthorEntity();
 
-        authorEntity.setUuid(UUID.randomUUID().toString());
+        authorEntity.setUuid(id);
         updateEntityFromDto(authorEntity, dto);
 
         return authorEntity;

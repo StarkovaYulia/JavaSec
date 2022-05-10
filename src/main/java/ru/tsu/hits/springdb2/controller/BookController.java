@@ -27,12 +27,12 @@ public class BookController {
 
     @PostMapping
     public BookDto create(@RequestBody CreateUpdateBookDto dto) {
-        return bookService.update(dto, null);
+        return bookService.createOrUpdate(dto, null);
     }
 
     @PutMapping("/{id}")
     public BookDto update(@PathVariable String id, @RequestBody CreateUpdateBookDto dto){
-        return bookService.update(dto, id);
+        return bookService.createOrUpdate(dto, id);
     }
 
     @DeleteMapping("/{id}")
