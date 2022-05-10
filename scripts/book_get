@@ -1,0 +1,3 @@
+﻿#!/bin/bash
+
+curl -X GET http://192.168.6.30:8192/book/849ecc73-5a6f-498c-9528-d4f925c3046e

@@ -7,7 +7,7 @@ create table author
 );
 
 alter table author
-    owner to hits;
+    owner to yulia;
 
 create table books
 (
@@ -22,7 +22,7 @@ create table books
 );
 
 alter table books
-    owner to hits;
+    owner to yulia;
 
 create table users
 (
@@ -37,5 +37,5 @@ create table users
 );
 
 alter table users
-    owner to hits;
+    owner to yulia;
 

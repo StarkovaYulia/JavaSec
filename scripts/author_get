@@ -1,0 +1,3 @@
+﻿#!/bin/bash
+
+curl -v -X GET http://localhost:8192/author/4577cf3e-e775-4c93-9533-9a404b05df9a
