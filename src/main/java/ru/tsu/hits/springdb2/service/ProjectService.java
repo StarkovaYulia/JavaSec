@@ -19,6 +19,7 @@ import java.util.stream.Collectors;
 
 public class ProjectService {
     private final ProjectRepository projectRepository;
+    private final ProjectDtoConverter projectDtoConverter;
 
     @Transactional
     public ProjectDto createOrUpdate(CreateUpdateProjectDto dto, String id) {
@@ -28,15 +29,15 @@ public class ProjectService {
 
         ProjectEntity entity;
         if (entityOptional.isEmpty()) {
-            entity = ProjectDtoConverter.convertDtoToEntity(UUID.randomUUID().toString(), dto);
+            entity = projectDtoConverter.convertDtoToEntity(UUID.randomUUID().toString(), dto);
         } else {
             entity = entityOptional.get();
-            ProjectDtoConverter.updateEntityFromDto(entity, dto);
+            projectDtoConverter.updateEntityFromDto(entity, dto);
         }
 
         entity = projectRepository.save(entity);
 
-        return ProjectDtoConverter.convertEntityToDto(entity);
+        return projectDtoConverter.convertEntityToDto(entity);
     }
 
     @Transactional(readOnly = true)
@@ -49,14 +50,14 @@ public class ProjectService {
     public ProjectDto getById(String uuid) {
         ProjectEntity projectEntity = getProjectEntityById(uuid);
 
-        return ProjectDtoConverter.convertEntityToDto(projectEntity);
+        return projectDtoConverter.convertEntityToDto(projectEntity);
     }
 
     @Transactional(readOnly = true)
     public List<ProjectDto> getAll() {
         return projectRepository.findAll()
                 .stream()
-                .map(ProjectDtoConverter::convertEntityToDto)
+                .map(projectDtoConverter::convertEntityToDto)
                 .collect(Collectors.toList());
     }
 

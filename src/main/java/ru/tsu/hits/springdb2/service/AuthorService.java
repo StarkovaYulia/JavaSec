@@ -7,11 +7,8 @@ import ru.tsu.hits.springdb2.dto.AuthorDto;
 import ru.tsu.hits.springdb2.dto.CreateUpdateAuthorDto;
 import ru.tsu.hits.springdb2.dto.converter.AuthorDtoConverter;
 import ru.tsu.hits.springdb2.entity.AuthorEntity;
-import ru.tsu.hits.springdb2.entity.BookEntity;
 import ru.tsu.hits.springdb2.exception.AuthorNotFoundException;
 import ru.tsu.hits.springdb2.repository.AuthorRepository;
-import ru.tsu.hits.springdb2.repository.BookRepository;
-
 
 import java.util.List;
 import java.util.UUID;
@@ -22,8 +19,6 @@ import java.util.stream.Collectors;
 public class AuthorService {
 
     private final AuthorRepository authorRepository;
-
-    private final BookRepository bookRepository;
 
     @Transactional
     public AuthorDto createOrUpdate(CreateUpdateAuthorDto dto, String id) {
@@ -40,7 +35,7 @@ public class AuthorService {
 
         authorEntity = authorRepository.save(authorEntity);
 
-        return AuthorDtoConverter.convertEntityToDto(authorEntity, getBooksByAuthor(authorEntity));
+        return AuthorDtoConverter.convertEntityToDto(authorEntity);
     }
 
     @Transactional
@@ -52,16 +47,15 @@ public class AuthorService {
 
     @Transactional(readOnly = true)
     public AuthorDto getAuthor(String uuid) {
-        AuthorEntity authorEntity = getAuthorEntityById(uuid);
-
-        return AuthorDtoConverter.convertEntityToDto(authorEntity, getBooksByAuthor(authorEntity));
+        var entity = getAuthorEntityById(uuid);
+        return AuthorDtoConverter.convertEntityToDto(entity);
     }
 
     @Transactional(readOnly = true)
     public List<AuthorDto> getAuthors() {
         return authorRepository.findAll()
                 .stream()
-                .map(author -> AuthorDtoConverter.convertEntityToDto(author, getBooksByAuthor(author)))
+                .map(AuthorDtoConverter::convertEntityToDto)
                 .collect(Collectors.toList());
     }
 
@@ -69,9 +63,5 @@ public class AuthorService {
     public AuthorEntity getAuthorEntityById(String uuid) {
         return authorRepository.findById(uuid)
                 .orElseThrow(() -> new AuthorNotFoundException("Author with id " + uuid + " not found"));
-    }
-
-    public List<BookEntity> getBooksByAuthor(AuthorEntity authorEntity) {
-        return bookRepository.findByAuthor(authorEntity);
     }
 }

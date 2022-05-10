@@ -6,7 +6,6 @@ import ru.tsu.hits.springdb2.entity.AuthorEntity;
 import ru.tsu.hits.springdb2.entity.BookEntity;
 
 public class BookDtoConverter {
-
     public static BookEntity convertDtoToEntity(String id, CreateUpdateBookDto dto, AuthorEntity author) {
         BookEntity entity = new BookEntity();
 

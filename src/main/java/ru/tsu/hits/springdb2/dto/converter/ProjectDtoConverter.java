@@ -1,36 +1,48 @@
 package ru.tsu.hits.springdb2.dto.converter;
 
+import lombok.AllArgsConstructor;
+import org.springframework.stereotype.Service;
 import ru.tsu.hits.springdb2.dto.CreateUpdateProjectDto;
 import ru.tsu.hits.springdb2.dto.ProjectDto;
 import ru.tsu.hits.springdb2.entity.ProjectEntity;
 
-public class ProjectDtoConverter {
+import java.util.stream.Collectors;
 
-    public static ProjectEntity convertDtoToEntity(String id, CreateUpdateProjectDto dto) {
+@Service
+@AllArgsConstructor
+public class ProjectDtoConverter {
+    private final TaskDtoConverter taskDtoConverter;
+
+    public ProjectEntity convertDtoToEntity(String id, CreateUpdateProjectDto dto) {
         ProjectEntity entity = new ProjectEntity();
 
         entity.setUuid(id);
         updateEntityFromDto(entity, dto);
 
         return entity;
-
     }
 
-    public static void updateEntityFromDto(ProjectEntity entity, CreateUpdateProjectDto dto) {
+    public void updateEntityFromDto(ProjectEntity entity, CreateUpdateProjectDto dto) {
         entity.setCreationDate(dto.getCreationDate());
         entity.setEditDate(dto.getEditDate());
         entity.setName(dto.getName());
         entity.setDescription(dto.getDescription());
     }
 
-    public static ProjectDto convertEntityToDto(ProjectEntity projectEntity) {
+    public ProjectDto convertEntityToDto(ProjectEntity entity) {
         var dto = new ProjectDto();
 
-        dto.setId(projectEntity.getUuid());
-        dto.setCreationDate(projectEntity.getCreationDate());
-        dto.setEditDate(projectEntity.getEditDate());
-        dto.setName(projectEntity.getName());
-        dto.setDescription(projectEntity.getDescription());
+        dto.setId(entity.getUuid());
+        dto.setCreationDate(entity.getCreationDate());
+        dto.setEditDate(entity.getEditDate());
+        dto.setName(entity.getName());
+        dto.setDescription(entity.getDescription());
+
+        var tasks = entity.getTasks()
+                .stream()
+                .map(taskDtoConverter::convertEntityToDto)
+                .collect(Collectors.toList());
+        dto.setTasks(tasks);
 
         return dto;
     }
