@@ -3,62 +3,28 @@ package ru.tsu.hits.springdb2.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+import ru.tsu.hits.springdb2.dto.CommentDto;
+import ru.tsu.hits.springdb2.dto.CreateUpdateCommentDto;
 import ru.tsu.hits.springdb2.dto.CreateUpdateTaskDto;
 import ru.tsu.hits.springdb2.dto.TaskDto;
-import ru.tsu.hits.springdb2.dto.UpdateTaskExecutorDto;
-import ru.tsu.hits.springdb2.dto.UpdateTaskPriorityDto;
+import ru.tsu.hits.springdb2.service.CommentService;
 import ru.tsu.hits.springdb2.service.TaskService;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/tasks")
 @RequiredArgsConstructor
 public class TaskController {
+
     private final TaskService taskService;
 
-    @GetMapping("/")
-    public List<TaskDto> getAll() {
-        return taskService.getAll();
-    }
-
-    @GetMapping("/{id}")
-    public TaskDto getById(@PathVariable String id) {
-        return taskService.getById(id);
-    }
-
-    @GetMapping("/by-executor/{id}")
-    public List<TaskDto> getByUserExecutorId(@PathVariable String id) {
-        return taskService.getByUserExecutorId(id);
-    }
-
-    @GetMapping("/by-project/{id}")
-    public List<TaskDto> getByProjectId(@PathVariable String id) {
-        return taskService.getByProjectId(id);
-    }
-
     @PostMapping
-    public TaskDto create(@RequestBody CreateUpdateTaskDto dto) {
-        return taskService.createOrUpdate(dto, null);
+    public TaskDto createTask(@RequestBody CreateUpdateTaskDto createUpdateTaskDto) {
+        return taskService.createTask(createUpdateTaskDto);
     }
 
-    @PutMapping("/{id}")
-    public TaskDto update(@PathVariable String id, @RequestBody CreateUpdateTaskDto dto) {
-        return taskService.createOrUpdate(dto, id);
+    @GetMapping(value = "/{id}")
+    public TaskDto getTask(@PathVariable String id) {
+        return taskService.getTaskDtoById(id);
     }
 
-    @PatchMapping("/priority/{id}")
-    public TaskDto updatePriority(@PathVariable String id, @RequestBody UpdateTaskPriorityDto dto) {
-        return taskService.updatePriority(dto, id);
-    }
-
-    @PatchMapping("/executor/{id}")
-    public TaskDto updateExecutor(@PathVariable String id, @RequestBody UpdateTaskExecutorDto dto) {
-        return taskService.updateExecutor(dto, id);
-    }
-
-    @DeleteMapping("/{id}")
-    public void delete(@PathVariable String id) {
-        taskService.delete(id);
-    }
 }

@@ -1,3 +1,0 @@
-﻿#!/bin/bash
-
-curl -X DELETE http://localhost:8192/authors/780c2141-05c7-48f0-9e86-b15f6fdd15ab

@@ -1,4 +1,0 @@
-﻿#!/bin/bash
-
-curl -X POST http://192.168.6.30:8192/books -H 'Content-Type: application/json' -d '{"name":"Some Book","authorId":"780c2141-05c7-48f0-9e86-b15f6fdd15ab","releaseDate":"2022-01-01T00:00:01Z","genre":"HORROR"}'
-# 849ecc73-5a6f-498c-9528-d4f925c3046e

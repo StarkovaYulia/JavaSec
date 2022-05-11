@@ -13,6 +13,7 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+
 public class ProjectEntity {
 
     @Id
@@ -27,10 +28,10 @@ public class ProjectEntity {
     @Column
     private Date editDate;
 
-    @Column(nullable = false)
+    @Column
     private String name;
 
-    @Column(nullable = false)
+    @Column
     private String description;
 
     @OneToMany(mappedBy = "project")

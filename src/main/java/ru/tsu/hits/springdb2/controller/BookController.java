@@ -6,38 +6,24 @@ import ru.tsu.hits.springdb2.dto.BookDto;
 import ru.tsu.hits.springdb2.dto.CreateUpdateBookDto;
 import ru.tsu.hits.springdb2.service.BookService;
 
-import java.util.List;
+import java.util.UUID;
 
 @RestController
-@RequestMapping("/books")
+@RequestMapping("/book")
 @RequiredArgsConstructor
 public class BookController {
 
     private final BookService bookService;
 
-    @GetMapping("/")
-    public List<BookDto> getAll(){
-        return bookService.getAll();
+    @PostMapping
+    public BookDto save(@RequestBody CreateUpdateBookDto createUpdateBookDto) {
+        return bookService.save(createUpdateBookDto);
     }
 
     @GetMapping("/{id}")
-    public BookDto getById(@PathVariable String id){
-        return bookService.getById(id);
+    public BookDto getById(@PathVariable UUID id){
+        return bookService.getById(id.toString());
     }
 
-    @PostMapping
-    public BookDto create(@RequestBody CreateUpdateBookDto dto) {
-        return bookService.createOrUpdate(dto, null);
-    }
-
-    @PutMapping("/{id}")
-    public BookDto update(@PathVariable String id, @RequestBody CreateUpdateBookDto dto){
-        return bookService.createOrUpdate(dto, id);
-    }
-
-    @DeleteMapping("/{id}")
-    public void delete(@PathVariable String id){
-        bookService.delete(id);
-    }
 }
 

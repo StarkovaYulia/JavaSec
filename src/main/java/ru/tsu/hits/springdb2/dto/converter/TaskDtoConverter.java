@@ -1,68 +1,76 @@
 package ru.tsu.hits.springdb2.dto.converter;
 
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.client.HttpClientErrorException;
+import ru.tsu.hits.springdb2.dto.CommentDto;
 import ru.tsu.hits.springdb2.dto.CreateUpdateTaskDto;
 import ru.tsu.hits.springdb2.dto.TaskDto;
-import ru.tsu.hits.springdb2.entity.ProjectEntity;
+import ru.tsu.hits.springdb2.entity.CommentEntity;
 import ru.tsu.hits.springdb2.entity.TaskEntity;
 import ru.tsu.hits.springdb2.entity.UsersEntity;
-import ru.tsu.hits.springdb2.repository.ProjectRepository;
 import ru.tsu.hits.springdb2.repository.UsersRepository;
 
+import javax.xml.stream.events.Comment;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 
-@Service
-@RequiredArgsConstructor
 public class TaskDtoConverter {
-    private final UsersRepository usersRepository;
 
-    private final ProjectRepository projectRepository;
+    public static TaskEntity convertDtoToEntity(CreateUpdateTaskDto dto) {
+        TaskEntity taskEntity = new TaskEntity();
 
-    public TaskEntity convertDtoToEntity(String id, CreateUpdateTaskDto dto) {
-        TaskEntity entity = new TaskEntity();
+        taskEntity.setUuid(UUID.randomUUID().toString());
+        taskEntity.setCreationDate(dto.getCreationDate());
+        taskEntity.setEditDate(dto.getEditDate());
+        taskEntity.setHeader(dto.getHeader());
+        taskEntity.setDescription(dto.getDescription());
+        taskEntity.setPriority(dto.getPriority());
+        taskEntity.setTemporaryMark(dto.getTemporaryMark());
 
-        entity.setUuid(id);
-        updateEntityFromDto(entity, dto);
-
-        return entity;
+        return taskEntity;
     }
 
-    public void updateEntityFromDto(TaskEntity entity, CreateUpdateTaskDto dto) {
-        entity.setCreationDate(dto.getCreationDate());
-        entity.setEditDate(dto.getEditDate());
-        entity.setHeader(dto.getHeader());
-        entity.setDescription(dto.getDescription());
-        entity.setPriority(dto.getPriority());
-        entity.setTemporaryMark(dto.getTemporaryMark());
+    public static TaskDto convertEntityToDto(TaskEntity taskEntity, List<CommentEntity> comments) {
 
-        entity.setUserCreator(getUserById(dto.getUserCreator()));
-        entity.setUserExecutor(getUserById(dto.getUserExecutor()));
-        entity.setProject(getProjectById(dto.getProject()));
+        TaskDto taskDto = new TaskDto();
+
+        taskDto.setId(taskEntity.getUuid());
+        taskDto.setCreationDate(taskEntity.getCreationDate());
+        taskDto.setEditDate(taskEntity.getEditDate());
+        taskDto.setHeader(taskEntity.getHeader());
+        taskDto.setDescription(taskEntity.getDescription());
+        taskDto.setPriority(taskEntity.getPriority());
+        taskDto.setTemporaryMark(taskEntity.getTemporaryMark());
+        taskDto.setUserCreator(taskEntity.getUserCreator().getUuid());
+        taskDto.setUserExecutor(taskEntity.getUserExecutor().getUuid());
+        taskDto.setProject(taskEntity.getProject().getUuid());
+        taskDto.setComments(convertCommentsToDto(comments));
+
+        return taskDto;
     }
 
-    public TaskDto convertEntityToDto(TaskEntity taskEntity) {
+    private static List<CommentDto> convertCommentsToDto(List<CommentEntity> commentEntities) {
+        List<CommentDto> result = new ArrayList<>();
 
-        TaskDto dto = new TaskDto();
+        commentEntities.forEach(element -> {
+            CommentDto commentDto = new CommentDto();
 
-        dto.setId(taskEntity.getUuid());
-        dto.setCreationDate(taskEntity.getCreationDate());
-        dto.setEditDate(taskEntity.getEditDate());
-        dto.setHeader(taskEntity.getHeader());
-        dto.setDescription(taskEntity.getDescription());
-        dto.setPriority(taskEntity.getPriority());
-        dto.setTemporaryMark(taskEntity.getTemporaryMark());
-        dto.setUserCreator(taskEntity.getUserCreator().getUuid());
-        dto.setUserExecutor(taskEntity.getUserExecutor().getUuid());
-        dto.setProject(taskEntity.getProject().getUuid());
+            commentDto.setId(element.getUuid());
+            commentDto.setCreationDate(element.getCreationDate());
+            commentDto.setEditDate(element.getEditDate());
+            commentDto.setUser(element.getUser().getUuid());
 
-        return dto;
+            result.add(commentDto);
+        });
+
+        return result;
+
     }
 
-    private UsersEntity getUserById(String id) {
-        return usersRepository.findById(id).orElseThrow();
-    }
 
-    private ProjectEntity getProjectById(String id) {
-        return projectRepository.findById(id).orElseThrow();
-    }
+
+
+
+
 }

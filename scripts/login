@@ -1,3 +1,0 @@
-﻿#!/bin/bash
-
-curl -v -X POST http://someoneexample.com:nothanks@localhost:8192/auth/login

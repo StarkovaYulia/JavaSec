@@ -1,49 +1,87 @@
 package ru.tsu.hits.springdb2.dto.converter;
 
-import lombok.AllArgsConstructor;
-import org.springframework.stereotype.Service;
+import ru.tsu.hits.springdb2.dto.CommentDto;
 import ru.tsu.hits.springdb2.dto.CreateUpdateProjectDto;
 import ru.tsu.hits.springdb2.dto.ProjectDto;
+import ru.tsu.hits.springdb2.dto.TaskDto;
+import ru.tsu.hits.springdb2.entity.CommentEntity;
 import ru.tsu.hits.springdb2.entity.ProjectEntity;
+import ru.tsu.hits.springdb2.entity.TaskEntity;
+import ru.tsu.hits.springdb2.entity.UsersEntity;
 
-import java.util.stream.Collectors;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 
-@Service
-@AllArgsConstructor
 public class ProjectDtoConverter {
-    private final TaskDtoConverter taskDtoConverter;
 
-    public ProjectEntity convertDtoToEntity(String id, CreateUpdateProjectDto dto) {
-        ProjectEntity entity = new ProjectEntity();
+    public static ProjectEntity convertDtoToEntity(CreateUpdateProjectDto dto) {
+        ProjectEntity projectEntity = new ProjectEntity();
 
-        entity.setUuid(id);
-        updateEntityFromDto(entity, dto);
+        projectEntity.setUuid(UUID.randomUUID().toString());
+        projectEntity.setCreationDate(dto.getCreationDate());
+        projectEntity.setEditDate(dto.getEditDate());
+        projectEntity.setName(dto.getName());
+        projectEntity.setDescription(dto.getDescription());
 
-        return entity;
+        return projectEntity;
+
     }
 
-    public void updateEntityFromDto(ProjectEntity entity, CreateUpdateProjectDto dto) {
-        entity.setCreationDate(dto.getCreationDate());
-        entity.setEditDate(dto.getEditDate());
-        entity.setName(dto.getName());
-        entity.setDescription(dto.getDescription());
+    public static ProjectDto convertEntityToDto(ProjectEntity projectEntity, List<TaskEntity> tasksEntity) {
+        ProjectDto projectDto = new ProjectDto();
+
+        projectDto.setId(projectEntity.getUuid());
+        projectDto.setCreationDate(projectEntity.getCreationDate());
+        projectDto.setEditDate(projectEntity.getEditDate());
+        projectDto.setName(projectEntity.getName());
+        projectDto.setDescription(projectEntity.getDescription());
+        //projectDto.setTasks(convertTasksToDto(tasksEntity));
+
+        return projectDto;
     }
 
-    public ProjectDto convertEntityToDto(ProjectEntity entity) {
-        var dto = new ProjectDto();
+    private static List<TaskDto> convertTasksToDto(List<TaskEntity> tasksEntities) {
+        List<TaskDto> result = new ArrayList<>();
 
-        dto.setId(entity.getUuid());
-        dto.setCreationDate(entity.getCreationDate());
-        dto.setEditDate(entity.getEditDate());
-        dto.setName(entity.getName());
-        dto.setDescription(entity.getDescription());
+        tasksEntities.forEach(element -> {
+            TaskDto taskDto = new TaskDto();
 
-        var tasks = entity.getTasks()
-                .stream()
-                .map(taskDtoConverter::convertEntityToDto)
-                .collect(Collectors.toList());
-        dto.setTasks(tasks);
+            taskDto.setId(element.getUuid());
+            taskDto.setCreationDate(element.getCreationDate());
+            taskDto.setEditDate(element.getEditDate());
+            taskDto.setHeader(element.getHeader());
+            taskDto.setDescription(element.getDescription());
+            taskDto.setPriority(element.getPriority());
+            taskDto.setTemporaryMark(element.getTemporaryMark());
+            taskDto.setUserCreator(element.getUserCreator().getUuid());
+            taskDto.setUserExecutor(element.getUserExecutor().getUuid());
+            taskDto.setProject(element.getProject().getUuid());
+            taskDto.setComments(convertCommentsToDto(element.getComments()));
 
-        return dto;
+            result.add(taskDto);
+        });
+
+        return result;
     }
+
+    public static List<CommentDto> convertCommentsToDto(List<CommentEntity> commentEntities) {
+
+        List<CommentDto> result = new ArrayList<>();
+
+        commentEntities.forEach(element -> {
+            CommentDto commentDto = new CommentDto();
+
+            commentDto.setId(element.getUuid());
+            commentDto.setCreationDate(element.getCreationDate());
+            commentDto.setEditDate(element.getEditDate());
+            commentDto.setUser(element.getUser().getUuid());
+
+            result.add(commentDto);
+        });
+
+        return result;
+
+    }
+
 }

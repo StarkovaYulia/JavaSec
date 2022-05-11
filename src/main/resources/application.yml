@@ -1,22 +1,20 @@
 spring:
   flyway:
     locations: classpath:migrations
-    url: jdbc:postgresql://192.168.6.13:5432/yuliadb
-    user: yulia
-    password: yulia
+    url: jdbc:postgresql://localhost:5432/spring_db
+    user: hits
+    password: hits
 
   datasource:
-    url: jdbc:postgresql://192.168.6.13:5432/yuliadb
-    username: yulia
-    password: yulia
+    url: jdbc:postgresql://localhost:5432/spring_db
+    username: hits
+    password: hits
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
-      ddl-auto: update # create-drop
+      ddl-auto: create-drop
 
 
 server:
   port: 8192
-
-csvPath: "/tasks.csv"
 

@@ -34,4 +34,6 @@ public class BookEntity {
     @Enumerated(EnumType.STRING)
     @Column
     private Genre genre;
+
+
 }

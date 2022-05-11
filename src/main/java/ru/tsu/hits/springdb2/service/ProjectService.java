@@ -2,68 +2,60 @@ package ru.tsu.hits.springdb2.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import ru.tsu.hits.springdb2.dto.CreateUpdateProjectDto;
+import ru.tsu.hits.springdb2.dto.CreateUpdateUserDto;
 import ru.tsu.hits.springdb2.dto.ProjectDto;
+import ru.tsu.hits.springdb2.dto.TaskDto;
 import ru.tsu.hits.springdb2.dto.converter.ProjectDtoConverter;
+import ru.tsu.hits.springdb2.dto.converter.TaskDtoConverter;
+import ru.tsu.hits.springdb2.entity.CommentEntity;
 import ru.tsu.hits.springdb2.entity.ProjectEntity;
+import ru.tsu.hits.springdb2.entity.TaskEntity;
 import ru.tsu.hits.springdb2.exception.ProjectNotFoundException;
+import ru.tsu.hits.springdb2.exception.TaskNotFoundException;
 import ru.tsu.hits.springdb2.repository.ProjectRepository;
+import ru.tsu.hits.springdb2.repository.TaskRepository;
 
+import javax.transaction.Transactional;
 import java.util.List;
-import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 
 public class ProjectService {
+
     private final ProjectRepository projectRepository;
-    private final ProjectDtoConverter projectDtoConverter;
+    private final TaskRepository taskRepository;
 
     @Transactional
-    public ProjectDto createOrUpdate(CreateUpdateProjectDto dto, String id) {
-        if (id == null) id = "";
+    public ProjectDto createProject(CreateUpdateProjectDto dto) {
 
-        var entityOptional = projectRepository.findById(id);
+        ProjectEntity projectEntity = ProjectDtoConverter.convertDtoToEntity(dto);
 
-        ProjectEntity entity;
-        if (entityOptional.isEmpty()) {
-            entity = projectDtoConverter.convertDtoToEntity(UUID.randomUUID().toString(), dto);
-        } else {
-            entity = entityOptional.get();
-            projectDtoConverter.updateEntityFromDto(entity, dto);
-        }
+        projectEntity = projectRepository.save(projectEntity);
 
-        entity = projectRepository.save(entity);
+        return ProjectDtoConverter.convertEntityToDto(projectEntity, getTasksByProject(projectEntity));
 
-        return projectDtoConverter.convertEntityToDto(entity);
     }
 
-    @Transactional(readOnly = true)
-    public ProjectEntity getProjectEntityById(String id) {
-        return projectRepository.findById(id)
+    private List<TaskEntity> getTasksByProject(ProjectEntity projectEntity) {
+        return taskRepository.findByProject(projectEntity);
+    }
+
+    @Transactional
+    public ProjectEntity getProjectEntityById(String uuid) {
+        return projectRepository.findById(uuid)
                 .orElseThrow(() -> new ProjectNotFoundException("There is no such project"));
     }
 
-    @Transactional(readOnly = true)
-    public ProjectDto getById(String uuid) {
+    @Transactional
+    public ProjectDto getProjectDtoById(String uuid) {
         ProjectEntity projectEntity = getProjectEntityById(uuid);
 
-        return projectDtoConverter.convertEntityToDto(projectEntity);
+        return ProjectDtoConverter.convertEntityToDto(projectEntity, getTasksByProject(projectEntity));
     }
 
-    @Transactional(readOnly = true)
-    public List<ProjectDto> getAll() {
-        return projectRepository.findAll()
-                .stream()
-                .map(projectDtoConverter::convertEntityToDto)
-                .collect(Collectors.toList());
-    }
 
-    @Transactional
-    public void delete(String id) {
-        var entity = getProjectEntityById(id);
-        projectRepository.delete(entity);
-    }
+
+
 }

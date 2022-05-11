@@ -1,40 +1,60 @@
 package ru.tsu.hits.springdb2.dto.converter;
 
 import ru.tsu.hits.springdb2.dto.AuthorDto;
+import ru.tsu.hits.springdb2.dto.BookDto;
 import ru.tsu.hits.springdb2.dto.CreateUpdateAuthorDto;
+import ru.tsu.hits.springdb2.dto.CreateUpdateTaskDto;
 import ru.tsu.hits.springdb2.entity.AuthorEntity;
+import ru.tsu.hits.springdb2.entity.BookEntity;
+import ru.tsu.hits.springdb2.entity.ProjectEntity;
+import ru.tsu.hits.springdb2.entity.TaskEntity;
+import ru.tsu.hits.springdb2.service.AuthorService;
+import ru.tsu.hits.springdb2.service.ProjectService;
 
-import java.util.stream.Collectors;
+import javax.transaction.Transactional;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 
 public class AuthorDtoConverter {
-    public static AuthorEntity convertDtoToEntity(String id, CreateUpdateAuthorDto dto) {
-        var entity = new AuthorEntity();
 
-        entity.setUuid(id);
-        updateEntityFromDto(entity, dto);
+    public static AuthorEntity convertDtoToEntity(CreateUpdateAuthorDto dto) {
+        AuthorEntity authorEntity = new AuthorEntity();
 
-        return entity;
+        authorEntity.setUuid(UUID.randomUUID().toString());
+        authorEntity.setFirstName(dto.getFirstName());
+        authorEntity.setLastName(dto.getLastName());
+
+        return authorEntity;
     }
 
-    public static void updateEntityFromDto(AuthorEntity entity, CreateUpdateAuthorDto dto) {
-        entity.setFirstName(dto.getFirstName());
-        entity.setLastName(dto.getLastName());
+    public static AuthorDto convertEntityToDto(AuthorEntity authorEntity, List<BookEntity> bookEntities) {
+        AuthorDto authorDto = new AuthorDto();
+
+        authorDto.setLastName(authorEntity.getLastName());
+        authorDto.setFirstName(authorEntity.getFirstName());
+        authorDto.setId(authorEntity.getUuid());
+        authorDto.setBooks(convertBooksToDto(bookEntities));
+
+        return authorDto;
     }
 
-    public static AuthorDto convertEntityToDto(AuthorEntity entity) {
-        var dto = new AuthorDto();
+    private static List<BookDto> convertBooksToDto(List<BookEntity> bookEntities) {
+        List<BookDto> result = new ArrayList<>();
 
-        dto.setLastName(entity.getLastName());
-        dto.setFirstName(entity.getFirstName());
-        dto.setId(entity.getUuid());
+        bookEntities.forEach(element -> {
+            BookDto bookDto = new BookDto();
 
-        var books = entity.getBooks()
-                .stream()
-                .map(BookDtoConverter::convertEntityToDto)
-                .collect(Collectors.toList());
-        dto.setBooks(books);
+            bookDto.setAuthor(element.getAuthor().getFirstName() + " " + element.getAuthor().getLastName());
+            bookDto.setGenre(element.getGenre());
+            bookDto.setName(element.getName());
+            bookDto.setReleaseDate(element.getReleaseDate());
+            bookDto.setId(element.getUuid());
 
-        return dto;
+            result.add(bookDto);
+        });
+
+        return result;
     }
 
 }
