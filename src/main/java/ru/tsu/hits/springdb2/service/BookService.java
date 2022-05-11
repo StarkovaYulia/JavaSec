@@ -1,16 +1,18 @@
 package ru.tsu.hits.springdb2.service;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.transaction.annotation.Transactional;
 import ru.tsu.hits.springdb2.dto.BookDto;
 import ru.tsu.hits.springdb2.dto.CreateUpdateBookDto;
+import ru.tsu.hits.springdb2.dto.converter.BookDtoConverter;
 import ru.tsu.hits.springdb2.entity.BookEntity;
+import ru.tsu.hits.springdb2.exception.BookNotFoundException;
 import ru.tsu.hits.springdb2.repository.BookRepository;
 
-import javax.transaction.Transactional;
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -21,38 +23,45 @@ public class BookService {
     private final AuthorService authorService;
 
     @Transactional
-    public BookDto save(CreateUpdateBookDto createUpdateBookDto) {
+    public BookDto createOrUpdate(CreateUpdateBookDto dto, String id) {
+        if (id == null) id = "";
 
-        var author = authorService.getAuthorEntityById(createUpdateBookDto.getAuthorId());
+        var entityOptional = bookRepository.findById(id);
 
-        var entity = new BookEntity(
-                UUID.randomUUID().toString(),
-                createUpdateBookDto.getName(),
-                author,
-                createUpdateBookDto.getReleaseDate(),
-                createUpdateBookDto.getGenre()
-        );
-        var savedEntity = bookRepository.save(entity);
+        BookEntity entity;
+        if (entityOptional.isEmpty()) {
+            entity = BookDtoConverter.convertDtoToEntity(UUID.randomUUID().toString(), dto, authorService);
+        } else {
+            entity = entityOptional.get();
+            BookDtoConverter.updateEntityFromDto(entity, dto, authorService);
+        }
 
-        return new BookDto(
-                savedEntity.getUuid(),
-                savedEntity.getName(),
-                authorService.getAuthorFullName(author),
-                savedEntity.getReleaseDate(),
-                savedEntity.getGenre()
-        );
+        entity = bookRepository.save(entity);
+
+        return BookDtoConverter.convertEntityToDto(entity);
     }
 
+    @Transactional
+    public void delete(String id) {
+        var entity = getBookEntityById(id);
+        bookRepository.delete(entity);
+    }
+
+    @Transactional(readOnly = false)
     public BookDto getById(String id) {
-        var entity = bookRepository.findById(id)
-                .orElseThrow(() -> new HttpClientErrorException(HttpStatus.NOT_FOUND));
-        return new BookDto(
-                entity.getUuid(),
-                entity.getName(),
-                authorService.getAuthorFullName(entity.getAuthor()),
-                entity.getReleaseDate(),
-                entity.getGenre()
-        );
+        var entity = getBookEntityById(id);
+        return BookDtoConverter.convertEntityToDto(entity);
     }
 
+    public List<BookDto> getAll() {
+        return bookRepository.findAll()
+                .stream()
+                .map(BookDtoConverter::convertEntityToDto)
+                .collect(Collectors.toList());
+    }
+
+    private BookEntity getBookEntityById(String id) {
+        return bookRepository.findById(id)
+                .orElseThrow(() -> new BookNotFoundException("Book not found"));
+    }
 }

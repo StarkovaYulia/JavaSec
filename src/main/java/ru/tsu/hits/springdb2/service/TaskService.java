@@ -1,84 +1,112 @@
 package ru.tsu.hits.springdb2.service;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.transaction.annotation.Transactional;
 import ru.tsu.hits.springdb2.dto.CreateUpdateTaskDto;
 import ru.tsu.hits.springdb2.dto.TaskDto;
+import ru.tsu.hits.springdb2.dto.UpdateTaskExecutorDto;
+import ru.tsu.hits.springdb2.dto.UpdateTaskPriorityDto;
 import ru.tsu.hits.springdb2.dto.converter.TaskDtoConverter;
 import ru.tsu.hits.springdb2.entity.*;
-import ru.tsu.hits.springdb2.exception.ProjectNotFoundException;
 import ru.tsu.hits.springdb2.exception.TaskNotFoundException;
-import ru.tsu.hits.springdb2.repository.CommentRepository;
-import ru.tsu.hits.springdb2.repository.ProjectRepository;
 import ru.tsu.hits.springdb2.repository.TaskRepository;
-import ru.tsu.hits.springdb2.repository.UsersRepository;
 
-import javax.transaction.Transactional;
 import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 
 public class TaskService {
-
     private final TaskRepository taskRepository;
-    private final ProjectRepository projectRepository;
-    private final UsersRepository usersRepository;
-    private final CommentRepository commentRepository;
-
-    private final ProjectService projectService;
+    private final TaskDtoConverter taskDtoConverter;
     private final UsersService usersService;
-
+    private final ProjectService projectService;
 
     @Transactional
-    public TaskDto createTask(CreateUpdateTaskDto dto) {
+    public TaskDto createOrUpdate(CreateUpdateTaskDto dto, String id) {
+        if (id == null) id = "";
 
-        TaskEntity taskEntity = TaskDtoConverter.convertDtoToEntity(dto);
+        var entityOptional = taskRepository.findById(id);
 
-        taskEntity.setUserCreator(getUserById(dto.getUserCreator()));
-        taskEntity.setUserExecutor(getUserById(dto.getUserExecutor()));
-        taskEntity.setProject(getProjectEntityById(dto.getProject()));
+        TaskEntity entity;
+        if (entityOptional.isEmpty()) {
+            entity = taskDtoConverter.convertDtoToEntity(UUID.randomUUID().toString(), dto);
+        } else {
+            entity = entityOptional.get();
+            taskDtoConverter.updateEntityFromDto(entity, dto);
+        }
 
-        var comments = getCommentsByTask(taskEntity);
-        taskEntity.setComments(comments);
+        entity = taskRepository.save(entity);
 
-        taskEntity = taskRepository.save(taskEntity);
-
-        return TaskDtoConverter.convertEntityToDto(taskEntity, comments);
-    }
-
-    private List<CommentEntity> getCommentsByTask(TaskEntity taskEntity) {
-        return commentRepository.findByTasks(taskEntity);
+        return taskDtoConverter.convertEntityToDto(entity);
     }
 
     @Transactional
-    public TaskDto getTaskDtoById(String uuid) {
-        TaskEntity taskEntity = getTaskEntityById(uuid);
+    public TaskDto updatePriority(UpdateTaskPriorityDto dto, String id) {
+        var entity = getTaskEntityById(id);
+        entity.setPriority(dto.getPriority());
 
-        return TaskDtoConverter.convertEntityToDto(taskEntity, getCommentsByTask(taskEntity));
+        entity = taskRepository.save(entity);
+
+        return taskDtoConverter.convertEntityToDto(entity);
     }
 
     @Transactional
-    public TaskEntity getTaskEntityById(String uuid) {
-        return taskRepository.findById(uuid)
-                .orElseThrow(() -> new TaskNotFoundException("Task with id " + uuid + " not found"));
+    public TaskDto updateExecutor(UpdateTaskExecutorDto dto, String id) {
+        var entity = getTaskEntityById(id);
+        var user = usersService.getUserEntityById(dto.getUserExecutor());
+        entity.setUserExecutor(user);
+
+        entity = taskRepository.save(entity);
+
+        return taskDtoConverter.convertEntityToDto(entity);
     }
 
     @Transactional
-    public UsersEntity getUserById(String uuid) {
-        return usersRepository.findById(uuid)
-                .orElseThrow(() -> new HttpClientErrorException(HttpStatus.NOT_FOUND));
+    public void delete(String id) {
+        var entity = getTaskEntityById(id);
+        taskRepository.delete(entity);
     }
 
-    @Transactional
-    public ProjectEntity getProjectEntityById(String uuid) {
-        return projectRepository.findById(uuid)
-                .orElseThrow(() -> new ProjectNotFoundException("There is no such project"));
+    @Transactional(readOnly = true)
+    public List<TaskDto> getAll() {
+        return taskRepository.findAll()
+                .stream()
+                .map(taskDtoConverter::convertEntityToDto)
+                .collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
+    public TaskDto getById(String id) {
+        var entity = getTaskEntityById(id);
+        return taskDtoConverter.convertEntityToDto(entity);
+    }
 
+    @Transactional(readOnly = true)
+    public List<TaskDto> getByUserExecutorId(String id) {
+        var user = usersService.getUserEntityById(id);
 
+        return taskRepository.findByUserExecutor(user)
+                .stream()
+                .map(taskDtoConverter::convertEntityToDto)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public List<TaskDto> getByProjectId(String id) {
+        var project = projectService.getProjectEntityById(id);
+
+        return taskRepository.findByProject(project)
+                .stream()
+                .map(taskDtoConverter::convertEntityToDto)
+                .collect(Collectors.toList());
+    }
+
+    private TaskEntity getTaskEntityById(String id) {
+        return taskRepository.findById(id)
+                .orElseThrow(() -> new TaskNotFoundException("Task with id " + id + " not found"));
+    }
 }
-

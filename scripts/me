@@ -1,0 +1,4 @@
+﻿#!/bin/bash
+
+curl -X GET --cookie "JSESSIONID=D4B27DB4C742E493CE40557C1D70F090" http://localhost:8192/auth/me
+# -H 'Authorization: Basic YWRtaW46YXBpcHdk'

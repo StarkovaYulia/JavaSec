@@ -30,4 +30,7 @@ public class AuthorEntity {
     @OneToMany( mappedBy = "author" )
     private List<BookEntity> books;
 
+    public String getFullName() {
+        return firstName + " " + lastName;
+    }
 }

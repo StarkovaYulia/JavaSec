@@ -1,0 +1,4 @@
+﻿#!/bin/bash
+
+curl -X POST http://192.168.6.30:8192/users -H 'Content-Type: application/json' -d '{"fio":"Someone","email":"someoneexample.com","password":"nothanks","role":"ADMIN","creationDate":"2033-01-01T00:00:00Z","editDate":"1991-01-01T00:00:00Z"}'
+# 6b85027a-2bbb-4101-9973-bd2cbdc3e81c

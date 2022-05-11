@@ -1,35 +1,46 @@
 package ru.tsu.hits.springdb2.dto.converter;
 
+import lombok.AllArgsConstructor;
+import org.springframework.stereotype.Service;
 import ru.tsu.hits.springdb2.dto.CommentDto;
 import ru.tsu.hits.springdb2.dto.CreateUpdateCommentDto;
-import ru.tsu.hits.springdb2.dto.UsersDto;
 import ru.tsu.hits.springdb2.entity.CommentEntity;
-import ru.tsu.hits.springdb2.entity.UsersEntity;
+import ru.tsu.hits.springdb2.service.UsersService;
 
-import java.util.UUID;
-
+@Service
+@AllArgsConstructor
 public class CommentDtoConverter {
+    private final UsersService usersService;
 
-    public static CommentEntity convertDtoToEntity(CreateUpdateCommentDto dto) {
-        CommentEntity commentEntity = new CommentEntity();
+    public CommentEntity convertDtoToEntity(String id, CreateUpdateCommentDto dto) {
+        var entity = new CommentEntity();
 
-        commentEntity.setUuid(UUID.randomUUID().toString());
-        commentEntity.setCreationDate(dto.getCreationDate());
-        commentEntity.setEditDate(dto.getEditDate());
+        entity.setUuid(id);
+        updateEntityFromDto(entity, dto);
 
-        return commentEntity;
+        return entity;
     }
 
-    public static CommentDto convertEntityToDto(CommentEntity commentEntity, UsersEntity usersEntity) {
+    public void updateEntityFromDto(CommentEntity entity, CreateUpdateCommentDto dto) {
+        entity.setCreationDate(dto.getCreationDate());
+        entity.setEditDate(dto.getEditDate());
+        entity.setText(dto.getText());
 
-        CommentDto commentDto = new CommentDto();
+        var user = usersService.getUserEntityById(dto.getUser());
+        entity.setUser(user);
+    }
 
-        commentDto.setId(commentEntity.getUuid());
-        commentDto.setCreationDate(commentEntity.getCreationDate());
-        commentDto.setEditDate(commentEntity.getEditDate());
-        commentDto.setUser(commentEntity.getUser().getUuid());
+    public CommentDto convertEntityToDto(CommentEntity entity) {
 
-        return commentDto;
+        var dto = new CommentDto();
+
+        dto.setId(entity.getUuid());
+        dto.setCreationDate(entity.getCreationDate());
+        dto.setEditDate(entity.getEditDate());
+        dto.setText(entity.getText());
+        dto.setUser(entity.getUser().getUuid());
+
+        return dto;
 
     }
 

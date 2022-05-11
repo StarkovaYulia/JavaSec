@@ -1,0 +1,4 @@
+﻿#!/bin/bash
+
+curl -X GET http://192.168.6.30:8192/projects/a26b831a-6454-445a-8034-ca213f18ff8e
+# a26b831a-6454-445a-8034-ca213f18ff8e

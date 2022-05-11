@@ -21,7 +21,8 @@ public class UsersDto {
 
     private String email;
 
-    private byte[] password;
+    //private byte[] password;
+    private String password;
 
     private Role role;
 

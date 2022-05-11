@@ -28,7 +28,7 @@ public class TaskEntity {
     @Column
     private Date editDate;
 
-    @Column
+    @Column(nullable = false)
     private String header;
 
     @Column

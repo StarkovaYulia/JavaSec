@@ -1,0 +1,4 @@
+﻿#!/bin/bash
+
+curl -X POST http://localhost:8192/authors -H 'Content-Type: application/json' -d '{"firstName":"vasily1","lastName":"pupkin1"}'
+# 780c2141-05c7-48f0-9e86-b15f6fdd15ab
